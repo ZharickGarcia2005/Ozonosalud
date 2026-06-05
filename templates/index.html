@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OZONO SALUD | Agendar cita</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}?v=6" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}?v=7" />
   </head>
   <body class="public-page">
     <main class="public-shell">
@@ -13,7 +13,10 @@
         <img src="{% static 'logo.png' %}" alt="OZONO SALUD" />
         <div>
           <p class="eyebrow">Consulta medica en linea</p>
-          <h1>{{ profile.title|default:"Agenda tu cita en OZONO SALUD" }}</h1>
+          <h1 class="brand-title" aria-label="{{ profile.title|default:'OZONO SALUD' }}">
+            <span>OZONO</span>
+            <span>SALUD</span>
+          </h1>
           <p>{{ profile.mission|default:"Elige una fecha y una hora disponible. Al finalizar recibiras un codigo para revisar tu cita." }}</p>
         </div>
         <div class="public-actions">
