@@ -1,0 +1,48 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ publication.title }} | OZONO SALUD</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}?v=6" />
+  </head>
+  <body class="public-page">
+    <main class="public-shell">
+      <header class="public-header">
+        <img src="{% static 'logo.png' %}" alt="OZONO SALUD" />
+        <div>
+          <p class="eyebrow">Publicacion</p>
+          <h1>{{ publication.title }}</h1>
+          <p>{{ publication.summary }}</p>
+        </div>
+        <div class="public-actions">
+          <a href="/#publicaciones" class="ghost-action admin-access">Volver</a>
+          <a href="/#agendar" class="primary-action admin-access">Agendar</a>
+        </div>
+      </header>
+
+      <article class="publication-detail">
+        {% if publication.image_src %}
+          <img class="publication-detail-image" src="{{ publication.image_src }}" alt="{{ publication.title }}" />
+        {% endif %}
+        <span class="appointment-meta">{{ publication.created_at|date:"d/m/Y" }}</span>
+        <div class="publication-content">
+          {{ publication.content|linebreaks }}
+        </div>
+      </article>
+
+      <section class="about-band" aria-label="Redes sociales">
+        <div>
+          <p class="eyebrow">OZONO SALUD</p>
+          <h2>Tambien estamos en redes</h2>
+        </div>
+        <p>{{ profile.about|default:"Consulta medica en linea con atencion cercana, organizada y segura." }}</p>
+        <div class="social-strip">
+          <a href="{{ profile.instagram_url|default:'https://www.instagram.com/ozono_salud_/' }}" target="_blank" rel="noreferrer">Instagram</a>
+          <a href="{{ profile.facebook_url|default:'https://www.facebook.com/ozonosaludmantaec' }}" target="_blank" rel="noreferrer">Facebook</a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,137 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Panel medico | OZONO SALUD</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}?v=6" />
+  </head>
+  <body class="staff-page">
+    <div class="staff-shell">
+      <aside class="staff-sidebar">
+        <img src="{% static 'logo.png' %}" alt="OZONO SALUD" />
+        <nav class="staff-nav">
+          <a href="/panel/" class="active">Consultas</a>
+          <a href="/admin/core/publication/">Publicaciones</a>
+          <a href="/admin/core/siteprofile/">Quienes somos</a>
+          <a href="/admin/core/siteprofile/">Configurar Zoom</a>
+          <a href="/admin/">Admin completo</a>
+        </nav>
+      </aside>
+
+      <main class="staff-main">
+        <header class="staff-header">
+          <div>
+            <p class="eyebrow">Panel medico</p>
+            <h1>Consultas y notas</h1>
+          </div>
+          <div class="staff-actions">
+            <a class="ghost-action" href="/">Ver sitio publico</a>
+            <a class="primary-action" href="/admin/core/appointment/add/">Nueva cita interna</a>
+          </div>
+        </header>
+
+        <section class="metrics-grid staff-metrics" aria-label="Resumen">
+          <article class="metric">
+            <span class="metric-label">Citas hoy</span>
+            <strong>{{ today_count }}</strong>
+            <small>{{ today|date:"d/m/Y" }}</small>
+          </article>
+          <article class="metric">
+            <span class="metric-label">Pendientes</span>
+            <strong>{{ pending_count }}</strong>
+            <small>Por atender o completar</small>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Agenda clinica</h2>
+            <label class="search staff-search">
+              <span aria-hidden="true">Q</span>
+              <input id="staffSearch" type="search" placeholder="Buscar paciente, fecha o codigo" />
+            </label>
+          </div>
+
+          <div class="consultation-list" id="consultationList">
+            {% for appointment in appointments %}
+              <article class="consultation-card" data-search="{{ appointment.patient.name }} {{ appointment.patient.email }} {{ appointment.date|date:'Y-m-d' }} {{ appointment.time }} {{ appointment.code }} {{ appointment.status }}">
+                <div class="consultation-summary">
+                  <div>
+                    <p class="appointment-time">{{ appointment.date|date:"d/m/Y" }} | {{ appointment.time }}</p>
+                    <h3>{{ appointment.patient.name }}</h3>
+                    <p class="appointment-meta">{{ appointment.patient.email }} | {{ appointment.patient.age }} años | {{ appointment.type }}</p>
+                    <p class="appointment-meta">Codigo {{ appointment.code }}</p>
+                  </div>
+                  <span class="appointment-status">{{ appointment.status }}</span>
+                </div>
+
+                <form class="notes-form" data-appointment-id="{{ appointment.id }}">
+                  {% csrf_token %}
+                  <div class="form-row">
+                    <label>
+                      Estado
+                      <select name="status">
+                        <option {% if appointment.status == "Confirmada" %}selected{% endif %}>Confirmada</option>
+                        <option {% if appointment.status == "En espera" %}selected{% endif %}>En espera</option>
+                        <option {% if appointment.status == "Completada" %}selected{% endif %}>Completada</option>
+                        <option {% if appointment.status == "Cancelada" %}selected{% endif %}>Cancelada</option>
+                      </select>
+                    </label>
+                  </div>
+                  <label>
+                    Notas de consulta
+                    <textarea name="clinical_notes" placeholder="Sintomas, indicaciones, seguimiento...">{{ appointment.clinical_notes }}</textarea>
+                  </label>
+                  <div class="clinical-documents">
+                    <label>
+                      Recetario
+                      <textarea name="prescription" placeholder="Medicamento, dosis, frecuencia, duracion e indicaciones...">{{ appointment.prescription }}</textarea>
+                    </label>
+                    <label>
+                      Orden de examen
+                      <textarea name="exam_order" placeholder="Examen solicitado, diagnostico presuntivo e indicaciones...">{{ appointment.exam_order }}</textarea>
+                    </label>
+                  </div>
+                  <div class="note-actions">
+                    {% with zoom_link=appointment.get_zoom_link %}
+                    {% if zoom_link %}
+                      <a class="primary-action zoom-btn" href="{{ zoom_link }}" target="_blank">Abrir Zoom</a>
+                    {% endif %}
+                    {% endwith %}
+                    <button
+                      class="ghost-action print-document"
+                      type="button"
+                      data-document-type="prescription"
+                      data-patient="{{ appointment.patient.name }}"
+                      data-age="{{ appointment.patient.age }}"
+                      data-code="{{ appointment.code }}"
+                      data-date="{{ appointment.date|date:'d/m/Y' }}"
+                    >Imprimir receta</button>
+                    <button
+                      class="ghost-action print-document"
+                      type="button"
+                      data-document-type="exam_order"
+                      data-patient="{{ appointment.patient.name }}"
+                      data-age="{{ appointment.patient.age }}"
+                      data-code="{{ appointment.code }}"
+                      data-date="{{ appointment.date|date:'d/m/Y' }}"
+                    >Imprimir orden</button>
+                    <button class="ghost-action" type="submit">Guardar notas</button>
+                    <span class="form-message" role="status"></span>
+                  </div>
+                </form>
+              </article>
+            {% empty %}
+              <p class="empty-state">Todavia no hay consultas registradas.</p>
+            {% endfor %}
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <section class="print-area" id="printArea" aria-hidden="true"></section>
+    <script src="{% static 'panel.js' %}?v=2"></script>
+  </body>
+</html>

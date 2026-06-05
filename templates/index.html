@@ -1,0 +1,137 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OZONO SALUD | Agendar cita</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}?v=6" />
+  </head>
+  <body class="public-page">
+    <main class="public-shell">
+      <header class="public-header">
+        <img src="{% static 'logo.png' %}" alt="OZONO SALUD" />
+        <div>
+          <p class="eyebrow">Consulta medica en linea</p>
+          <h1>{{ profile.title|default:"Agenda tu cita en OZONO SALUD" }}</h1>
+          <p>{{ profile.mission|default:"Elige una fecha y una hora disponible. Al finalizar recibiras un codigo para revisar tu cita." }}</p>
+        </div>
+        <div class="public-actions">
+          <a href="#quienes-somos" class="ghost-action admin-access">Quienes somos</a>
+          <a href="#publicaciones" class="ghost-action admin-access">Publicaciones</a>
+          <a href="#agendar" class="primary-action admin-access">Agendar</a>
+          <a href="/panel/" class="ghost-action admin-access">Panel medico</a>
+        </div>
+      </header>
+
+      <section class="about-band" id="quienes-somos" aria-labelledby="about-title">
+        <div>
+          <p class="eyebrow">Quienes somos</p>
+          <h2 id="about-title">Atencion medica organizada y cercana</h2>
+        </div>
+        <p>{{ profile.about|default:"OZONO SALUD brinda consultas medicas en linea con una experiencia simple para pacientes y un flujo ordenado para el equipo medico." }}</p>
+        {% if profile.phone or profile.address %}
+          <div class="contact-strip">
+            {% if profile.phone %}<span>{{ profile.phone }}</span>{% endif %}
+            {% if profile.address %}<span>{{ profile.address }}</span>{% endif %}
+          </div>
+        {% endif %}
+        <div class="social-strip" aria-label="Redes sociales">
+          <a href="{{ profile.instagram_url|default:'https://www.instagram.com/ozono_salud_/' }}" target="_blank" rel="noreferrer">Instagram</a>
+          <a href="{{ profile.facebook_url|default:'https://www.facebook.com/ozonosaludmantaec' }}" target="_blank" rel="noreferrer">Facebook</a>
+        </div>
+      </section>
+
+      <section class="patient-portal-grid" id="agendar" aria-label="Portal de citas">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Nueva cita</h2>
+          </div>
+          <form class="patient-form" id="appointmentForm">
+            <label>
+              Nombre completo
+              <input name="name" autocomplete="name" required />
+            </label>
+            <label>
+              Correo electronico
+              <input name="email" type="email" autocomplete="email" required />
+            </label>
+            <label>
+              Edad
+              <input name="age" type="number" min="1" max="120" required />
+            </label>
+            <label>
+              Motivo de consulta
+              <textarea name="condition" required></textarea>
+            </label>
+            <div class="form-row">
+              <label>
+                Fecha
+                <input name="date" type="date" required />
+              </label>
+              <label>
+                Hora
+                <select name="time" id="appointmentTime" required></select>
+              </label>
+            </div>
+            <label>
+              Tipo de cita
+              <select name="type">
+                <option>Consulta medica</option>
+                <option>Control</option>
+                <option>Seguimiento</option>
+                <option>Certificado medico</option>
+              </select>
+            </label>
+            <button class="primary-action full" type="submit">Crear cita</button>
+            <p class="form-message" id="appointmentMessage" role="status"></p>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Revisar cita</h2>
+          </div>
+          <form class="patient-form compact" id="lookupForm">
+            <label>
+              Codigo de revision
+              <input name="code" maxlength="8" autocomplete="one-time-code" required />
+            </label>
+            <label>
+              Correo electronico
+              <input name="email" type="email" autocomplete="email" />
+            </label>
+            <button class="ghost-action full" type="submit">Revisar cita</button>
+          </form>
+          <div class="lookup-card" id="lookupResult" hidden></div>
+        </section>
+      </section>
+
+      <section class="publications-section" id="publicaciones" aria-labelledby="publications-title">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Publicaciones</p>
+            <h2 id="publications-title">Novedades y orientacion</h2>
+          </div>
+        </div>
+        <div class="publication-grid">
+          {% for publication in publications %}
+            <article class="publication-card">
+              {% if publication.image_src %}
+                <img class="publication-card-image" src="{{ publication.image_src }}" alt="{{ publication.title }}" loading="lazy" />
+              {% endif %}
+              <span class="appointment-meta">{{ publication.created_at|date:"d/m/Y" }}</span>
+              <h3>{{ publication.title }}</h3>
+              <p>{{ publication.summary }}</p>
+              <a href="{% url 'publication_detail' publication.id %}" class="ghost-action publication-link">Leer publicacion</a>
+            </article>
+          {% empty %}
+            <p class="empty-state">Pronto compartiremos publicaciones y novedades.</p>
+          {% endfor %}
+        </div>
+      </section>
+    </main>
+
+    <script src="{% static 'app.js' %}?v=5"></script>
+  </body>
+</html>
