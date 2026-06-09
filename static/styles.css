@@ -71,7 +71,7 @@ button {
 }
 
 .public-shell {
-  width: min(1180px, calc(100vw - 32px));
+  width: min(1120px, calc(100vw - 32px));
   margin: 0 auto;
   padding: 28px 0 40px;
 }
@@ -90,8 +90,8 @@ button {
 }
 
 .public-header img {
-  width: 168px;
-  height: 132px;
+  width: 224px;
+  height: 176px;
   object-fit: contain;
 }
 
@@ -158,8 +158,8 @@ button {
 
 .about-band {
   display: grid;
-  grid-template-columns: 0.65fr 1fr;
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 14px;
   align-items: start;
 }
 
@@ -206,7 +206,7 @@ button {
 
 .publication-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 360px));
   gap: 14px;
   margin-top: 16px;
 }
@@ -285,8 +285,8 @@ button {
 }
 
 .staff-sidebar img {
-  width: 176px;
-  height: 136px;
+  width: 216px;
+  height: 168px;
   object-fit: contain;
   display: block;
   margin: 0 auto 22px;
@@ -795,8 +795,8 @@ h2 {
 }
 
 .auth-panel img {
-  width: 168px;
-  height: 132px;
+  width: 204px;
+  height: 160px;
   object-fit: contain;
 }
 
@@ -1479,8 +1479,8 @@ menu {
   }
 
   .public-header img {
-    width: 132px;
-    height: 104px;
+    width: 168px;
+    height: 132px;
   }
 
   .topbar,
