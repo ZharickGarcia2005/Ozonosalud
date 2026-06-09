@@ -90,8 +90,8 @@ button {
 }
 
 .public-header img {
-  width: 118px;
-  height: 92px;
+  width: 168px;
+  height: 132px;
   object-fit: contain;
 }
 
@@ -285,8 +285,8 @@ button {
 }
 
 .staff-sidebar img {
-  width: 138px;
-  height: 104px;
+  width: 176px;
+  height: 136px;
   object-fit: contain;
   display: block;
   margin: 0 auto 22px;
@@ -795,8 +795,8 @@ h2 {
 }
 
 .auth-panel img {
-  width: 124px;
-  height: 100px;
+  width: 168px;
+  height: 132px;
   object-fit: contain;
 }
 
@@ -1479,8 +1479,8 @@ menu {
   }
 
   .public-header img {
-    width: 104px;
-    height: 82px;
+    width: 132px;
+    height: 104px;
   }
 
   .topbar,
