@@ -16,6 +16,26 @@ function getCookie(name) {
   return "";
 }
 
+function getCsrfToken() {
+  return appointmentForm?.elements.csrfmiddlewaretoken?.value || getCookie("csrftoken");
+}
+
+async function readJsonResponse(response) {
+  const contentType = response.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  const text = await response.text();
+  if (response.status === 403) {
+    return { error: "No se pudo validar la seguridad del formulario. Recarga la pagina e intenta de nuevo." };
+  }
+  if (response.status >= 500) {
+    return { error: "El servidor tuvo un error. Revisa que PythonAnywhere tenga las migraciones aplicadas." };
+  }
+  return { error: text ? "El servidor respondio con un formato inesperado." : "No se pudo completar la solicitud." };
+}
+
 function setDefaultDate() {
   const dateInput = appointmentForm?.elements.date;
   if (dateInput) {
@@ -41,7 +61,9 @@ function buildTimeOptions() {
 async function loadReservedSlots() {
   try {
     const response = await fetch("/api/appointments");
-    reservedSlots = await response.json();
+    const result = await readJsonResponse(response);
+    if (!response.ok) throw new Error(result.error || "No se pudieron cargar los horarios.");
+    reservedSlots = result;
     updateTimeAvailability();
   } catch (error) {
     console.error("Error al cargar horarios ocupados:", error);
@@ -314,11 +336,11 @@ appointmentForm?.addEventListener("submit", async (event) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken"),
+        "X-CSRFToken": getCsrfToken(),
       },
       body: JSON.stringify(payload),
     });
-    const result = await response.json();
+    const result = await readJsonResponse(response);
 
     if (!response.ok) {
       throw new Error(result.error || "No se pudo crear la cita.");
@@ -344,7 +366,7 @@ lookupForm?.addEventListener("submit", async (event) => {
 
   try {
     const response = await fetch(`/api/appointments/lookup?${params.toString()}`);
-    const result = await response.json();
+    const result = await readJsonResponse(response);
 
     if (!response.ok) {
       throw new Error(result.error || "No se pudo consultar la cita.");

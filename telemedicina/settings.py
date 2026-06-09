@@ -39,6 +39,7 @@ MIDDLEWARE = [
 LOGIN_URL = 'doctor_login'
 LOGIN_REDIRECT_URL = 'doctor_panel'
 LOGOUT_REDIRECT_URL = 'doctor_login'
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 
 ROOT_URLCONF = 'telemedicina.urls'
 

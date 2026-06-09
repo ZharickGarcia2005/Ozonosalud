@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.core.cache import cache
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -46,6 +46,15 @@ def parse_json_body(request):
         return json.loads(request.body.decode("utf-8")), None
     except json.JSONDecodeError:
         return None, JsonResponse({"error": "Solicitud invalida."}, status=400)
+
+
+def csrf_failure(request, reason=""):
+    if request.path.startswith("/api/"):
+        return JsonResponse(
+            {"error": "No se pudo validar la seguridad del formulario. Recarga la pagina e intenta de nuevo."},
+            status=403,
+        )
+    return HttpResponseForbidden("No se pudo validar la seguridad del formulario.")
 
 
 def get_site_profile():
