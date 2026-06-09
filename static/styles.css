@@ -36,10 +36,10 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background-image: var(--watermark-url, url("/static/receipt-logo.png"));
-  background-position: center 48%;
+  background-position: center 58%;
   background-repeat: no-repeat;
-  background-size: min(70vw, 720px);
-  opacity: 0.08;
+  background-size: min(64vw, 640px);
+  opacity: 0.09;
 }
 
 body > * {
@@ -966,6 +966,7 @@ h2 {
   grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
   gap: 18px;
   margin-top: 18px;
+  margin-bottom: 24px;
 }
 
 .patient-card header {
