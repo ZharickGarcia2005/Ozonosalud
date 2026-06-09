@@ -6,6 +6,13 @@ admin.site.site_header = "OZONO SALUD administracion"
 admin.site.site_title = "OZONO SALUD"
 admin.site.index_title = "Panel de contenido y consultas"
 
+
+def superuser_admin_access(request):
+    return request.user.is_active and request.user.is_superuser
+
+
+admin.site.has_permission = superuser_admin_access
+
 @admin.register(Patient)
 class PatientAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'age', 'condition', 'last', 'initials')
@@ -28,8 +35,9 @@ class AppointmentAdmin(admin.ModelAdmin):
 class SiteProfileAdmin(admin.ModelAdmin):
     list_display = ("title", "phone", "address", "zoom_url", "instagram_url", "facebook_url")
     fieldsets = (
-        ("Presentacion publica", {"fields": ("title", "about", "mission")}),
+        ("Presentacion publica", {"fields": ("title", "doctor_name", "tagline", "about", "mission")}),
         ("Contacto, redes y Zoom", {"fields": ("phone", "address", "zoom_url", "instagram_url", "facebook_url")}),
+        ("Marca", {"fields": ("logo", "watermark")}),
     )
 
 

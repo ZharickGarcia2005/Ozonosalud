@@ -1,0 +1,53 @@
+<!doctype html>
+{% load static %}
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }} | OZONO SALUD</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}?v=8" />
+  </head>
+  <body class="staff-page" style="--watermark-url: url('{{ profile.watermark_src }}');">
+    <div class="staff-shell">
+      <aside class="staff-sidebar">
+        <img src="{{ profile.logo_src }}" alt="{{ profile.title|default:'OZONO SALUD' }}" />
+        <nav class="staff-nav">
+          <a href="{% url 'doctor_panel' %}">Consultas</a>
+          <a href="{% url 'panel_publications' %}" class="active">Publicaciones</a>
+          <a href="{% url 'panel_site_settings' %}">Sitio y Zoom</a>
+        </nav>
+      </aside>
+
+      <main class="staff-main">
+        <header class="staff-header">
+          <div>
+            <p class="eyebrow">Publicaciones</p>
+            <h1>{{ title }}</h1>
+          </div>
+          <div class="staff-actions">
+            <a class="ghost-action" href="{% url 'panel_publications' %}">Volver</a>
+          </div>
+        </header>
+
+        <section class="panel">
+          <form method="post" enctype="multipart/form-data" class="panel-form">
+            {% csrf_token %}
+            <div class="form-grid">
+              {% for field in form %}
+                <label class="{% if field.name == 'content' or field.name == 'summary' or field.name == 'image' or field.name == 'image_url' %}span-2{% endif %}">
+                  {{ field.label }}
+                  {{ field }}
+                  {% for error in field.errors %}<span class="form-message error">{{ error }}</span>{% endfor %}
+                </label>
+              {% endfor %}
+            </div>
+            <div class="note-actions">
+              <button class="primary-action" type="submit">Guardar publicacion</button>
+              <a class="ghost-action" href="{% url 'panel_publications' %}">Cancelar</a>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

@@ -5,18 +5,24 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Panel medico | OZONO SALUD</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}?v=7" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}?v=8" />
   </head>
-  <body class="staff-page">
+  <body
+    class="staff-page"
+    style="--watermark-url: url('{{ profile.watermark_src }}');"
+    data-site-title="{{ profile.title|default:'OZONO SALUD' }}"
+    data-site-tagline="{{ profile.tagline|default:'Tu salud en buenas manos' }}"
+    data-doctor-name="{{ profile.doctor_name }}"
+    data-logo-src="{{ profile.logo_src }}"
+    data-watermark-src="{{ profile.watermark_src }}"
+  >
     <div class="staff-shell">
       <aside class="staff-sidebar">
-        <img src="{% static 'logo.png' %}" alt="OZONO SALUD" />
+        <img src="{{ profile.logo_src }}" alt="{{ profile.title|default:'OZONO SALUD' }}" />
         <nav class="staff-nav">
           <a href="/panel/" class="active">Consultas</a>
-          <a href="/admin/core/publication/">Publicaciones</a>
-          <a href="/admin/core/siteprofile/">Quienes somos</a>
-          <a href="/admin/core/siteprofile/">Configurar Zoom</a>
-          <a href="/admin/">Admin completo</a>
+          <a href="{% url 'panel_publications' %}">Publicaciones</a>
+          <a href="{% url 'panel_site_settings' %}">Sitio y Zoom</a>
         </nav>
       </aside>
 
@@ -28,7 +34,10 @@
           </div>
           <div class="staff-actions">
             <a class="ghost-action" href="/">Ver sitio publico</a>
-            <a class="primary-action" href="/admin/core/appointment/add/">Nueva cita interna</a>
+            <form method="post" action="{% url 'doctor_logout' %}">
+              {% csrf_token %}
+              <button class="ghost-action" type="submit">Cerrar sesion</button>
+            </form>
           </div>
         </header>
 

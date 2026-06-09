@@ -1,15 +1,51 @@
 import json
 from datetime import datetime
 
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.core.cache import cache
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.contrib.admin.views.decorators import staff_member_required
-from django.views.decorators.csrf import csrf_exempt
+from django.core.validators import validate_email
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_http_methods
 
+from .forms import PublicationForm, SiteProfileForm
 from .models import Appointment, Patient, Publication, SiteProfile
+
+
+MAX_JSON_BODY_SIZE = 16_384
+
+
+def client_ip(request):
+    forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR", "unknown")
+
+
+def rate_limited(request, scope, limit, window_seconds):
+    key = f"rate:{scope}:{client_ip(request)}"
+    added = cache.add(key, 1, window_seconds)
+    if added:
+        return False
+    try:
+        count = cache.incr(key)
+    except ValueError:
+        cache.set(key, 1, window_seconds)
+        return False
+    return count > limit
+
+
+def parse_json_body(request):
+    if len(request.body) > MAX_JSON_BODY_SIZE:
+        return None, JsonResponse({"error": "Solicitud demasiado grande."}, status=413)
+    try:
+        return json.loads(request.body.decode("utf-8")), None
+    except json.JSONDecodeError:
+        return None, JsonResponse({"error": "Solicitud invalida."}, status=400)
 
 
 def get_site_profile():
@@ -19,10 +55,16 @@ def get_site_profile():
     return SiteProfile.objects.create()
 
 
+@ensure_csrf_cookie
 def index(request):
     profile = get_site_profile()
     publications = Publication.objects.filter(published=True)[:6]
-    return render(request, "index.html", {"profile": profile, "publications": publications})
+    title_parts = profile.title.split(" ", 1)
+    return render(
+        request,
+        "index.html",
+        {"profile": profile, "publications": publications, "title_parts": title_parts},
+    )
 
 
 def publication_detail(request, publication_id):
@@ -60,7 +102,7 @@ def appointment_payload(appt):
     }
 
 
-@staff_member_required
+@login_required(login_url="doctor_login")
 def doctor_panel(request):
     today = timezone.localdate()
     appointments = Appointment.objects.select_related("patient").all().order_by("date", "time")
@@ -78,13 +120,12 @@ def doctor_panel(request):
     )
 
 
-@staff_member_required
+@login_required(login_url="doctor_login")
 @require_http_methods(["POST"])
 def appointment_notes_api(request, appointment_id):
-    try:
-        payload = json.loads(request.body.decode("utf-8"))
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Solicitud invalida."}, status=400)
+    payload, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
 
     try:
         appointment = Appointment.objects.select_related("patient").get(id=appointment_id)
@@ -99,14 +140,74 @@ def appointment_notes_api(request, appointment_id):
     return JsonResponse(appointment_payload(appointment))
 
 
+@login_required(login_url="doctor_login")
+def panel_site_settings(request):
+    profile = get_site_profile()
+    if request.method == "POST":
+        form = SiteProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect("panel_site_settings")
+    else:
+        form = SiteProfileForm(instance=profile)
+    return render(request, "panel_site_settings.html", {"form": form, "profile": profile})
+
+
+@login_required(login_url="doctor_login")
+def panel_publications(request):
+    publications = Publication.objects.all()
+    profile = get_site_profile()
+    return render(
+        request,
+        "panel_publications.html",
+        {"publications": publications, "profile": profile},
+    )
+
+
+@login_required(login_url="doctor_login")
+def panel_publication_create(request):
+    profile = get_site_profile()
+    if request.method == "POST":
+        form = PublicationForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect("panel_publications")
+    else:
+        form = PublicationForm()
+    return render(
+        request,
+        "panel_publication_form.html",
+        {"form": form, "profile": profile, "title": "Nueva publicacion"},
+    )
+
+
+@login_required(login_url="doctor_login")
+def panel_publication_edit(request, publication_id):
+    publication = get_object_or_404(Publication, id=publication_id)
+    profile = get_site_profile()
+    if request.method == "POST":
+        form = PublicationForm(request.POST, request.FILES, instance=publication)
+        if form.is_valid():
+            form.save()
+            return redirect("panel_publications")
+    else:
+        form = PublicationForm(instance=publication)
+    return render(
+        request,
+        "panel_publication_form.html",
+        {"form": form, "profile": profile, "title": "Editar publicacion"},
+    )
+
+
 def patients_api(request):
     return JsonResponse({"error": "Acceso restringido al panel administrador."}, status=403)
 
 
 @require_http_methods(["GET", "POST"])
-@csrf_exempt
 def appointments_api(request):
     if request.method == "POST":
+        if rate_limited(request, "appointments:create", 8, 300):
+            return JsonResponse({"error": "Demasiados intentos. Espera unos minutos."}, status=429)
         return create_appointment(request)
 
     appointments = [
@@ -120,11 +221,21 @@ def appointments_api(request):
 
 
 def appointment_lookup_api(request):
+    if rate_limited(request, "appointments:lookup", 20, 300):
+        return JsonResponse({"error": "Demasiadas consultas. Espera unos minutos."}, status=429)
+
     code = request.GET.get("code", "").strip().upper()
     email = request.GET.get("email", "").strip().lower()
 
     if not code:
         return JsonResponse({"error": "Ingresa el codigo de revision."}, status=400)
+    if len(code) > 8:
+        return JsonResponse({"error": "Codigo invalido."}, status=400)
+    if email:
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({"error": "Correo invalido."}, status=400)
 
     try:
         appointment = Appointment.objects.select_related("patient").get(code=code)
@@ -138,16 +249,15 @@ def appointment_lookup_api(request):
 
 
 def create_appointment(request):
-    try:
-        payload = json.loads(request.body.decode("utf-8"))
-    except json.JSONDecodeError:
-        return JsonResponse({"error": "Solicitud invalida."}, status=400)
+    payload, error_response = parse_json_body(request)
+    if error_response:
+        return error_response
 
-    name = payload.get("name", "").strip()
-    email = payload.get("email", "").strip().lower()
+    name = payload.get("name", "").strip()[:100]
+    email = payload.get("email", "").strip().lower()[:254]
     age = payload.get("age")
-    condition = payload.get("condition", "").strip()
-    appointment_type = payload.get("type", "").strip() or "Consulta medica"
+    condition = payload.get("condition", "").strip()[:200]
+    appointment_type = (payload.get("type", "").strip() or "Consulta medica")[:100]
     date_value = payload.get("date", "").strip()
     time_value = payload.get("time", "").strip()
 
@@ -172,6 +282,17 @@ def create_appointment(request):
         age_value = int(age)
     except ValueError:
         return JsonResponse({"error": "Revisa la fecha, hora y edad ingresadas."}, status=400)
+
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({"error": "Ingresa un correo electronico valido."}, status=400)
+
+    if not 1 <= age_value <= 120:
+        return JsonResponse({"error": "La edad debe estar entre 1 y 120."}, status=400)
+
+    if date_obj < timezone.localdate():
+        return JsonResponse({"error": "La fecha no puede estar en el pasado."}, status=400)
 
     if time_obj.minute != 0:
         return JsonResponse({"error": "Las citas deben agendarse en horas exactas, por ejemplo 05:00, 06:00 o 07:00."}, status=400)

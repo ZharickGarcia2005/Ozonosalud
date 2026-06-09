@@ -65,6 +65,12 @@ class Appointment(models.Model):
 
 class SiteProfile(models.Model):
     title = models.CharField(max_length=140, default="OZONO SALUD", verbose_name="Titulo")
+    doctor_name = models.CharField(max_length=140, blank=True, verbose_name="Nombre del doctor")
+    tagline = models.CharField(
+        max_length=160,
+        default="Tu salud en buenas manos",
+        verbose_name="Frase de marca",
+    )
     about = models.TextField(
         default="Consulta medica en linea con atencion cercana, organizada y segura.",
         verbose_name="Quienes somos",
@@ -81,6 +87,20 @@ class SiteProfile(models.Model):
         verbose_name="Facebook",
     )
     zoom_url = models.URLField(blank=True, verbose_name="Cuenta o enlace de Zoom")
+    logo = models.FileField(upload_to="site/", blank=True, verbose_name="Logo")
+    watermark = models.FileField(upload_to="site/", blank=True, verbose_name="Marca de agua")
+
+    @property
+    def logo_src(self):
+        if self.logo:
+            return self.logo.url
+        return "/static/logo.png"
+
+    @property
+    def watermark_src(self):
+        if self.watermark:
+            return self.watermark.url
+        return "/static/receipt-logo.png"
 
     def __str__(self):
         return self.title

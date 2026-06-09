@@ -76,19 +76,25 @@ document.querySelectorAll(".print-document").forEach((button) => {
     const form = button.closest(".notes-form");
     const printArea = document.querySelector("#printArea");
     const documentType = button.dataset.documentType;
+    const siteTitle = document.body.dataset.siteTitle || "OZONO SALUD";
+    const siteTagline = document.body.dataset.siteTagline || "Tu salud en buenas manos";
+    const doctorName = document.body.dataset.doctorName || "";
+    const logoSrc = document.body.dataset.logoSrc || "/static/receipt-logo.png";
+    const watermarkSrc = document.body.dataset.watermarkSrc || logoSrc;
     const sourceField = form.querySelector(`[name="${documentType}"]`);
     const title = documentType === "prescription" ? "Recetario medico" : "Orden de examen";
     const documentClass = documentType === "exam_order" ? "exam-print-sheet" : "prescription-print-sheet";
 
     printArea.innerHTML = `
       <article class="medical-print-sheet ${documentClass}">
-        <img class="print-watermark" src="/static/receipt-logo.png" alt="" />
+        <img class="print-watermark" src="${escapeHtml(watermarkSrc)}" alt="" />
         <header class="print-header">
-          <img class="print-logo" src="/static/receipt-logo.png" alt="OZONO SALUD" />
+          <img class="print-logo" src="${escapeHtml(logoSrc)}" alt="${escapeHtml(siteTitle)}" />
           <div>
-            <p class="eyebrow">OZONO SALUD</p>
+            <p class="eyebrow">${escapeHtml(siteTitle)}</p>
             <h1>${title}</h1>
-            <p class="print-tagline">Tu salud en buenas manos</p>
+            <p class="print-tagline">${escapeHtml(siteTagline)}</p>
+            ${doctorName ? `<p class="appointment-meta">${escapeHtml(doctorName)}</p>` : ""}
           </div>
           <div class="print-code">Codigo ${escapeHtml(button.dataset.code)}</div>
         </header>

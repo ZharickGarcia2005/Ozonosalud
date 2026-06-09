@@ -7,6 +7,15 @@ const lookupResult = document.querySelector("#lookupResult");
 const appointmentTime = document.querySelector("#appointmentTime");
 const todayIso = new Date().toISOString().slice(0, 10);
 
+function getCookie(name) {
+  const cookies = document.cookie ? document.cookie.split(";") : [];
+  for (const cookie of cookies) {
+    const [key, ...value] = cookie.trim().split("=");
+    if (key === name) return decodeURIComponent(value.join("="));
+  }
+  return "";
+}
+
 function setDefaultDate() {
   const dateInput = appointmentForm?.elements.date;
   if (dateInput) {
@@ -303,7 +312,10 @@ appointmentForm?.addEventListener("submit", async (event) => {
   try {
     const response = await fetch("/api/appointments", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
       body: JSON.stringify(payload),
     });
     const result = await response.json();

@@ -5,19 +5,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>OZONO SALUD | Agendar cita</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}?v=7" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}?v=8" />
   </head>
-  <body class="public-page">
+  <body class="public-page" style="--watermark-url: url('{{ profile.watermark_src }}');">
     <main class="public-shell">
       <header class="public-header">
-        <img src="{% static 'logo.png' %}" alt="OZONO SALUD" />
+        <img src="{{ profile.logo_src }}" alt="{{ profile.title|default:'OZONO SALUD' }}" />
         <div>
           <p class="eyebrow">Consulta medica en linea</p>
           <h1 class="brand-title" aria-label="{{ profile.title|default:'OZONO SALUD' }}">
-            <span>OZONO</span>
-            <span>SALUD</span>
+            <span>{{ title_parts.0|default:"OZONO" }}</span>
+            <span>{{ title_parts.1|default:"SALUD" }}</span>
           </h1>
           <p>{{ profile.mission|default:"Elige una fecha y una hora disponible. Al finalizar recibiras un codigo para revisar tu cita." }}</p>
+          {% if profile.doctor_name %}
+            <p class="brand-doctor">{{ profile.doctor_name }}</p>
+          {% endif %}
         </div>
         <div class="public-actions">
           <a href="#quienes-somos" class="ghost-action admin-access">Quienes somos</a>
@@ -33,6 +36,9 @@
           <h2 id="about-title">Atencion medica organizada y cercana</h2>
         </div>
         <p>{{ profile.about|default:"OZONO SALUD brinda consultas medicas en linea con una experiencia simple para pacientes y un flujo ordenado para el equipo medico." }}</p>
+        {% if profile.tagline %}
+          <p class="brand-tagline">{{ profile.tagline }}</p>
+        {% endif %}
         {% if profile.phone or profile.address %}
           <div class="contact-strip">
             {% if profile.phone %}<span>{{ profile.phone }}</span>{% endif %}

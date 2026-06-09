@@ -35,7 +35,7 @@ body::before {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: url("/static/receipt-logo.png");
+  background-image: var(--watermark-url, url("/static/receipt-logo.png"));
   background-position: center;
   background-repeat: no-repeat;
   background-size: min(62vw, 560px);
@@ -122,6 +122,12 @@ button {
   max-width: 68ch;
 }
 
+.public-header .brand-doctor,
+.brand-tagline {
+  color: var(--blue);
+  font-weight: 800;
+}
+
 .admin-access {
   text-decoration: none;
   display: inline-flex;
@@ -135,6 +141,10 @@ button {
   gap: 10px;
   flex-wrap: wrap;
   justify-content: end;
+}
+
+.staff-actions form {
+  margin: 0;
 }
 
 .about-band,
@@ -768,6 +778,103 @@ h2 {
 
 .panel {
   padding: 20px;
+}
+
+.auth-shell {
+  width: min(460px, calc(100vw - 32px));
+  min-height: 100vh;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  padding: 28px 0;
+}
+
+.auth-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.auth-panel img {
+  width: 124px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.panel-form {
+  display: grid;
+  gap: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.form-grid label {
+  display: grid;
+  gap: 8px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.form-grid input,
+.form-grid textarea,
+.form-grid select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 11px 12px;
+}
+
+.form-grid input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+.form-grid input[type="file"] {
+  padding: 10px;
+  background: #fbfdff;
+}
+
+.span-2 {
+  grid-column: 1 / -1;
+}
+
+.publication-admin-list {
+  display: grid;
+  gap: 14px;
+}
+
+.publication-admin-row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fbfdff;
+}
+
+.publication-admin-row img {
+  width: 96px;
+  height: 72px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.publication-admin-row h2 {
+  font-size: 18px;
+  margin: 4px 0;
+}
+
+.publication-admin-row p {
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .appointment-list,
@@ -1412,8 +1519,15 @@ menu {
   .patient-grid,
   .schedule-board,
   .publication-grid,
-  .staff-metrics {
+  .staff-metrics,
+  .form-grid,
+  .publication-admin-row {
     grid-template-columns: 1fr;
+  }
+
+  .publication-admin-row img {
+    width: 100%;
+    height: 160px;
   }
 
   .staff-main {
