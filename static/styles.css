@@ -225,16 +225,18 @@ button {
   width: 100%;
   border-radius: 8px;
   border: 1px solid var(--line);
-  object-fit: cover;
   background: var(--surface-2);
 }
 
 .publication-card-image {
   aspect-ratio: 16 / 9;
+  object-fit: cover;
 }
 
 .publication-detail-image {
-  max-height: 420px;
+  display: block;
+  height: auto;
+  object-fit: contain;
 }
 
 .publication-link {
