@@ -151,6 +151,8 @@
                       data-age="{{ appointment.patient.age }}"
                       data-code="{{ appointment.code }}"
                       data-date="{{ appointment.date|date:'d/m/Y' }}"
+                      data-attention-date="{{ appointment.date|date:'d/m/Y' }}"
+                      data-issued-date="{{ appointment.date|date:'d/m/Y' }}"
                       data-time="{{ appointment.time }}"
                     >Imprimir certificado</button>
                     <button class="ghost-action" type="submit">Guardar notas</button>
@@ -167,6 +169,6 @@
     </div>
 
     <section class="print-area" id="printArea" aria-hidden="true"></section>
-    <script src="{% static 'panel.js' %}?v=5"></script>
+    <script src="{% static 'panel.js' %}?v=6"></script>
   </body>
 </html>

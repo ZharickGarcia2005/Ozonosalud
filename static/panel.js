@@ -163,10 +163,13 @@ function renderStandardDocument(button, form, printArea) {
 }
 
 function getCertificateData(button, form) {
+  const appointmentDate = button.dataset.attentionDate || button.dataset.date || "";
+
   return {
     patient: button.dataset.patient,
     age: button.dataset.age,
-    date: button.dataset.date,
+    attentionDate: appointmentDate,
+    issuedDate: button.dataset.issuedDate || appointmentDate,
     time: button.dataset.time,
     code: button.dataset.code,
     patientId: form.querySelector('[name="certificate_patient_id"]')?.value.trim() || "",
@@ -181,7 +184,7 @@ function formatCertificateText(data) {
       <strong>${escapeHtml(data.patient)}</strong>, de <strong>${escapeHtml(data.age)} a&ntilde;os de edad</strong>,
       con c&eacute;dula de identidad N.&deg; <strong>${escapeHtml(data.patientId)}</strong>, fue atendido/a
       en consulta m&eacute;dica por el Dr. <strong>Fabricio Ch&aacute;vez</strong> el d&iacute;a
-      <strong>${escapeHtml(data.date)}</strong>, a las <strong>${escapeHtml(data.time)}</strong>,
+      <strong>${escapeHtml(data.attentionDate)}</strong>, a las <strong>${escapeHtml(data.time)}</strong>,
       en la ciudad de <strong>Manta, Manab&iacute;</strong>, presentando un cuadro cl&iacute;nico compatible
       con <strong>${escapeHtml(data.reason)}</strong>.
     </p>
@@ -191,7 +194,8 @@ function formatCertificateText(data) {
     </p>
 
     <div class="certificate-details">
-      <p><strong>Lugar y fecha:</strong> Manta, Manab&iacute;, <strong>${escapeHtml(data.date)}</strong></p>
+      <p><strong>Fecha de atenci&oacute;n:</strong> <strong>${escapeHtml(data.attentionDate)}</strong></p>
+      <p><strong>Lugar y fecha:</strong> Manta, Manab&iacute;, <strong>${escapeHtml(data.issuedDate)}</strong></p>
       <p><strong>Hora de atenci&oacute;n:</strong> <strong>${escapeHtml(data.time)}</strong></p>
       <p><strong>C&oacute;digo de certificado:</strong> <strong>${escapeHtml(data.code)}</strong></p>
     </div>
