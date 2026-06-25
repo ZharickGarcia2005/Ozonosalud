@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Panel medico | OZONO SALUD</title>
-    <link rel="stylesheet" href="{% static 'styles.css' %}?v=16" />
+    <link rel="stylesheet" href="{% static 'styles.css' %}?v=17" />
   </head>
   <body
     class="staff-page"
@@ -133,6 +133,9 @@
                       data-age="{{ appointment.patient.age }}"
                       data-code="{{ appointment.code }}"
                       data-date="{{ appointment.date|date:'d/m/Y' }}"
+                      data-time="{{ appointment.time }}"
+                      data-patient-id="{{ appointment.certificate_patient_id }}"
+                      data-reason="{{ appointment.patient.condition }}"
                     >Imprimir receta</button>
                     <button
                       class="ghost-action print-document"
@@ -142,6 +145,9 @@
                       data-age="{{ appointment.patient.age }}"
                       data-code="{{ appointment.code }}"
                       data-date="{{ appointment.date|date:'d/m/Y' }}"
+                      data-time="{{ appointment.time }}"
+                      data-patient-id="{{ appointment.certificate_patient_id }}"
+                      data-reason="{{ appointment.patient.condition }}"
                     >Imprimir orden</button>
                     <button
                       class="ghost-action print-document"
@@ -169,6 +175,6 @@
     </div>
 
     <section class="print-area" id="printArea" aria-hidden="true"></section>
-    <script src="{% static 'panel.js' %}?v=6"></script>
+    <script src="{% static 'panel.js' %}?v=7"></script>
   </body>
 </html>

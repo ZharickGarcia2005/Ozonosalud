@@ -1461,6 +1461,91 @@ dialog::backdrop {
   text-transform: uppercase;
 }
 
+.document-print-sheet {
+  page: medical-document;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 20mm 22mm 18mm;
+}
+
+.document-print-sheet::before,
+.document-print-sheet::after {
+  display: none;
+}
+
+.document-print-sheet .print-logo {
+  width: 30mm;
+  height: 34mm;
+}
+
+.document-print-sheet .print-header {
+  align-items: center;
+  gap: 8mm;
+  min-height: 35mm;
+  padding: 0 2mm 5mm;
+  z-index: 3;
+}
+
+.document-print-sheet .print-header > div {
+  min-width: 0;
+}
+
+.document-print-sheet .print-header h1 {
+  font-size: 24px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.document-patient-grid {
+  grid-template-columns: 1.35fr 0.55fr 0.8fr;
+  margin: 7mm 0 0;
+  padding-bottom: 5mm;
+  z-index: 3;
+}
+
+.document-print-body {
+  display: grid;
+  gap: 7mm;
+  min-height: 112mm;
+  background: transparent;
+  padding: 9mm 2mm 0;
+  z-index: 3;
+}
+
+.document-section h2 {
+  color: #0c489c;
+  font-size: 15px;
+  margin: 0 0 9px;
+  text-transform: uppercase;
+}
+
+.document-section p {
+  margin: 0;
+}
+
+.clinical-print-list {
+  display: grid;
+  gap: 8px;
+}
+
+.clinical-print-item {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid #dce7f0;
+  border-left: 4px solid #7ac143;
+  border-radius: 8px;
+  line-height: 1.55;
+  padding: 9px 11px;
+  break-inside: avoid;
+}
+
+.document-print-footer {
+  justify-items: start;
+  gap: 16px;
+  margin-top: 12mm;
+  text-align: left;
+}
+
 .certificate-body p {
   margin: 0;
 }
@@ -1693,6 +1778,11 @@ menu {
     margin: 0;
   }
 
+  @page medical-document {
+    size: A4 portrait;
+    margin: 0;
+  }
+
   body::before {
     display: none;
   }
@@ -1722,6 +1812,19 @@ menu {
     padding: 0;
   }
 
+  body.medical-document-print-mode {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+  }
+
+  body.medical-document-print-mode .print-area {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 0;
+  }
+
   .medical-print-sheet {
     display: block;
     min-height: calc(297mm - 28mm);
@@ -1731,6 +1834,26 @@ menu {
   .exam-print-sheet {
     height: calc(297mm - 28mm);
     overflow: hidden;
+  }
+
+  .document-print-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 20mm 22mm 18mm;
+    overflow: visible;
+    break-inside: auto;
+  }
+
+  .document-print-sheet.exam-print-sheet {
+    height: auto;
+    min-height: 297mm;
+    overflow: visible;
+  }
+
+  .document-print-sheet .certificate-watermark {
+    width: 108mm;
+    height: 108mm;
   }
 
   .certificate-print-sheet {

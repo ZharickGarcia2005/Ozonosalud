@@ -90,8 +90,8 @@ function waitForPrintImages(container) {
   );
 }
 
-function setCertificatePageStyle(enabled) {
-  const styleId = "certificatePrintPageStyle";
+function setPrintPageStyle(enabled) {
+  const styleId = "medicalPrintPageStyle";
   const existingStyle = document.querySelector(`#${styleId}`);
 
   if (!enabled) {
@@ -109,15 +109,64 @@ function setCertificatePageStyle(enabled) {
 
 function preparePrintMode(isCertificate) {
   document.body.classList.toggle("certificate-print-mode", isCertificate);
-  setCertificatePageStyle(isCertificate);
+  document.body.classList.toggle("medical-document-print-mode", !isCertificate);
+  setPrintPageStyle(true);
 }
 
 function clearPrintMode() {
   document.body.classList.remove("certificate-print-mode");
-  setCertificatePageStyle(false);
+  document.body.classList.remove("medical-document-print-mode");
+  setPrintPageStyle(false);
 }
 
 window.addEventListener("afterprint", clearPrintMode);
+
+function formatDocumentItems(value) {
+  const cleanValue = value.trim();
+  if (!cleanValue) return [];
+
+  const blocks = cleanValue.includes("\n\n")
+    ? cleanValue.split(/\n{2,}/)
+    : cleanValue.split(/\n(?=\s*(?:[-*•]|\d+[\).]|\w))/);
+
+  return blocks
+    .map((block) => block.trim())
+    .filter(Boolean)
+    .map((block) => escapeHtml(block).replace(/\n/g, "<br>"));
+}
+
+function splitDocumentSections(value) {
+  const cleanValue = value.trim();
+  if (!cleanValue) return { main: [], notes: [] };
+
+  const markerMatch = cleanValue.match(/\n?\s*(observaciones|indicaciones)\s*:/i);
+  const mainText = markerMatch ? cleanValue.slice(0, markerMatch.index).trim() : cleanValue;
+  const notesText = markerMatch
+    ? cleanValue.slice(markerMatch.index).replace(/^\s*(observaciones|indicaciones)\s*:\s*/i, "").trim()
+    : "";
+
+  return {
+    main: formatDocumentItems(mainText),
+    notes: formatDocumentItems(notesText),
+  };
+}
+
+function formatDocumentItemList(items, emptyMessage) {
+  if (!items.length) return `<p class="print-empty">${emptyMessage}</p>`;
+  return items.map((item) => `<article class="clinical-print-item">${item}</article>`).join("");
+}
+
+function getStandardDocumentData(button, form) {
+  return {
+    patient: button.dataset.patient || "",
+    age: button.dataset.age || "",
+    patientId: form.querySelector('[name="certificate_patient_id"]')?.value.trim() || button.dataset.patientId || "",
+    date: button.dataset.date || "",
+    time: button.dataset.time || "",
+    code: button.dataset.code || "",
+    reason: button.dataset.reason || form.querySelector('[name="certificate_reason"]')?.value.trim() || "",
+  };
+}
 
 function renderStandardDocument(button, form, printArea) {
   const documentType = button.dataset.documentType;
@@ -157,6 +206,82 @@ function renderStandardDocument(button, form, printArea) {
       <footer class="print-footer">
         <div class="signature-line"></div>
         <p>Firma y sello medico</p>
+      </footer>
+    </article>
+  `;
+}
+
+function renderStructuredStandardDocument(button, form, printArea) {
+  const documentType = button.dataset.documentType;
+  const siteTitle = document.body.dataset.siteTitle || "OZONO SALUD";
+  const siteTagline = document.body.dataset.siteTagline || "Tu salud en buenas manos";
+  const doctorName = document.body.dataset.doctorName || "";
+  const logoSrc = document.body.dataset.logoSrc || "/static/receipt-logo.png";
+  const watermarkSrc = document.body.dataset.watermarkSrc || logoSrc;
+  const sourceField = form.querySelector(`[name="${documentType}"]`);
+  const data = getStandardDocumentData(button, form);
+  const isExamOrder = documentType === "exam_order";
+  const title = isExamOrder ? "Orden de examen" : "Recetario m&eacute;dico";
+  const documentClass = isExamOrder ? "exam-print-sheet" : "prescription-print-sheet";
+  const contentSections = splitDocumentSections(sourceField.value);
+  const contentTitle = isExamOrder ? "Ex&aacute;menes solicitados" : "Medicamentos e indicaciones";
+  const emptyMessage = isExamOrder ? "Sin examenes registrados." : "Sin medicamentos registrados.";
+
+  printArea.innerHTML = `
+    <article class="medical-print-sheet document-print-sheet ${documentClass}">
+      <div class="certificate-frame certificate-frame-outer" aria-hidden="true"></div>
+      <div class="certificate-frame certificate-frame-inner" aria-hidden="true"></div>
+      <img class="certificate-watermark" src="${escapeHtml(watermarkSrc)}" alt="" />
+      <header class="print-header">
+        <img class="print-logo" src="${escapeHtml(logoSrc)}" alt="${escapeHtml(siteTitle)}" />
+        <div>
+          <p class="eyebrow">${escapeHtml(siteTitle)}</p>
+          <h1>${title}</h1>
+          <p class="print-tagline">${escapeHtml(siteTagline)}</p>
+          ${doctorName ? `<p class="appointment-meta">${escapeHtml(doctorName)}</p>` : ""}
+        </div>
+        <div class="print-code">Codigo ${escapeHtml(data.code)}</div>
+      </header>
+
+      <section class="print-patient-grid document-patient-grid">
+        <p><strong>Paciente:</strong> ${escapeHtml(data.patient)}</p>
+        <p><strong>Edad:</strong> ${escapeHtml(data.age)} a&ntilde;os</p>
+        <p><strong>C&eacute;dula:</strong> ${escapeHtml(data.patientId) || "No registrada"}</p>
+        <p><strong>Fecha de atenci&oacute;n:</strong> ${escapeHtml(data.date)}</p>
+        <p><strong>Hora:</strong> ${escapeHtml(data.time)}</p>
+        <p><strong>C&oacute;digo:</strong> ${escapeHtml(data.code)}</p>
+      </section>
+
+      <section class="print-body document-print-body">
+        <div class="document-section">
+          <h2>Motivo / diagn&oacute;stico</h2>
+          <p>${data.reason ? escapeHtml(data.reason) : "No registrado."}</p>
+        </div>
+
+        <div class="document-section">
+          <h2>${contentTitle}</h2>
+          <div class="clinical-print-list">
+            ${formatDocumentItemList(contentSections.main, emptyMessage)}
+          </div>
+        </div>
+
+        ${contentSections.notes.length ? `
+          <div class="document-section">
+            <h2>${isExamOrder ? "Observaciones" : "Indicaciones adicionales"}</h2>
+            <div class="clinical-print-list">
+              ${formatDocumentItemList(contentSections.notes, "Sin observaciones registradas.")}
+            </div>
+          </div>
+        ` : ""}
+      </section>
+
+      <footer class="print-footer document-print-footer">
+        <p>
+          <strong>Dr. Fabricio Ch&aacute;vez</strong><br>
+          M&eacute;dico tratante<br>
+          Consultorio M&eacute;dico <strong>OZONO SALUD</strong>
+        </p>
+        <p><strong>Sello:</strong> <span class="certificate-seal-line"></span></p>
       </footer>
     </article>
   `;
@@ -259,7 +384,7 @@ document.querySelectorAll(".print-document").forEach((button) => {
       if (!renderCertificateDocument(button, form, printArea)) return;
       preparePrintMode(true);
     } else {
-      renderStandardDocument(button, form, printArea);
+      renderStructuredStandardDocument(button, form, printArea);
       preparePrintMode(false);
     }
 
