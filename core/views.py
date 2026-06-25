@@ -108,6 +108,8 @@ def appointment_payload(appt):
         "clinical_notes": appt.clinical_notes,
         "prescription": appt.prescription,
         "exam_order": appt.exam_order,
+        "certificate_patient_id": appt.certificate_patient_id,
+        "certificate_reason": appt.certificate_reason,
     }
 
 
@@ -144,6 +146,8 @@ def appointment_notes_api(request, appointment_id):
     appointment.clinical_notes = payload.get("clinical_notes", "").strip()
     appointment.prescription = payload.get("prescription", "").strip()
     appointment.exam_order = payload.get("exam_order", "").strip()
+    appointment.certificate_patient_id = payload.get("certificate_patient_id", "").strip()[:20]
+    appointment.certificate_reason = payload.get("certificate_reason", "").strip()
     appointment.status = payload.get("status", appointment.status).strip() or appointment.status
     appointment.save()
     return JsonResponse(appointment_payload(appointment))

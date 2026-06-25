@@ -28,6 +28,7 @@ class AppointmentAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Datos de la cita", {"fields": ("date", "time", "patient", "type", "status", "code")}),
         ("Consulta", {"fields": ("clinical_notes", "prescription", "exam_order")}),
+        ("Certificado medico", {"fields": ("certificate_patient_id", "certificate_reason")}),
     )
 
 

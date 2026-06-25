@@ -103,6 +103,22 @@
                       <textarea name="exam_order" placeholder="Examen solicitado, diagnostico presuntivo e indicaciones...">{{ appointment.exam_order }}</textarea>
                     </label>
                   </div>
+                  <div class="certificate-fields">
+                    <label>
+                      Cedula del paciente
+                      <input
+                        name="certificate_patient_id"
+                        type="text"
+                        inputmode="numeric"
+                        placeholder="Cedula para el certificado"
+                        value="{{ appointment.certificate_patient_id }}"
+                      />
+                    </label>
+                    <label>
+                      Razon del justificado o motivo de atencion medica
+                      <textarea name="certificate_reason" placeholder="Ej. cuadro de gastroenteritis, infeccion respiratoria, malestar general, control medico...">{{ appointment.certificate_reason }}</textarea>
+                    </label>
+                  </div>
                   <div class="note-actions">
                     {% with zoom_link=appointment.get_zoom_link %}
                     {% if zoom_link %}
@@ -117,7 +133,6 @@
                       data-age="{{ appointment.patient.age }}"
                       data-code="{{ appointment.code }}"
                       data-date="{{ appointment.date|date:'d/m/Y' }}"
-                      data-time="{{ appointment.time }}"
                     >Imprimir receta</button>
                     <button
                       class="ghost-action print-document"
@@ -127,7 +142,6 @@
                       data-age="{{ appointment.patient.age }}"
                       data-code="{{ appointment.code }}"
                       data-date="{{ appointment.date|date:'d/m/Y' }}"
-                      data-time="{{ appointment.time }}"
                     >Imprimir orden</button>
                     <button
                       class="ghost-action print-document"
@@ -153,6 +167,6 @@
     </div>
 
     <section class="print-area" id="printArea" aria-hidden="true"></section>
-    <script src="{% static 'panel.js' %}?v=3"></script>
+    <script src="{% static 'panel.js' %}?v=4"></script>
   </body>
 </html>

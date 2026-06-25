@@ -37,6 +37,8 @@ class Appointment(models.Model):
     clinical_notes = models.TextField(blank=True, verbose_name="Notas de la consulta")
     prescription = models.TextField(blank=True, verbose_name="Recetario")
     exam_order = models.TextField(blank=True, verbose_name="Orden de examen")
+    certificate_patient_id = models.CharField(max_length=20, blank=True, verbose_name="Cedula del paciente")
+    certificate_reason = models.TextField(blank=True, verbose_name="Razon del certificado medico")
 
     def save(self, *args, **kwargs):
         if not self.code:
