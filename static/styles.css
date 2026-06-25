@@ -1389,6 +1389,52 @@ dialog::backdrop {
   padding: 28px 4px 12px;
 }
 
+.certificate-print-sheet {
+  page: medical-certificate;
+  width: 100%;
+  min-height: 269mm;
+  padding: 18mm 19mm 16mm;
+}
+
+.certificate-print-sheet::before {
+  inset: 5mm;
+}
+
+.certificate-print-sheet::after {
+  inset: 8mm;
+}
+
+.certificate-print-sheet .print-watermark {
+  width: 58%;
+  max-width: 340px;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  opacity: 0.055;
+}
+
+.certificate-print-sheet .print-logo {
+  width: 86px;
+  height: 98px;
+}
+
+.certificate-print-sheet .print-header {
+  align-items: center;
+  justify-content: flex-start;
+  gap: 20px;
+  min-height: 112px;
+  padding: 0 4px 14px;
+}
+
+.certificate-print-sheet .print-header > div {
+  min-width: 0;
+}
+
+.certificate-print-sheet .print-header h1 {
+  font-size: 26px;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 .certificate-body p {
   margin: 0;
 }
@@ -1616,6 +1662,11 @@ menu {
     margin: 14mm;
   }
 
+  @page medical-certificate {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+
   body::before {
     display: none;
   }
@@ -1643,9 +1694,29 @@ menu {
     overflow: hidden;
   }
 
+  .certificate-print-sheet {
+    width: 100%;
+    min-height: calc(297mm - 28mm);
+    padding: 18mm 19mm 16mm;
+    overflow: visible;
+    break-inside: avoid;
+  }
+
+  .certificate-print-sheet .print-watermark {
+    width: 56%;
+    max-width: 330px;
+  }
+
+  .certificate-print-sheet .certificate-body {
+    min-height: auto;
+    padding-top: 22px;
+  }
+
   .print-header,
   .print-patient-grid,
-  .print-footer {
+  .print-footer,
+  .certificate-details,
+  .certificate-signature-block {
     break-inside: avoid;
   }
 }
