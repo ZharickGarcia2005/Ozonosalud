@@ -117,6 +117,7 @@
                       data-age="{{ appointment.patient.age }}"
                       data-code="{{ appointment.code }}"
                       data-date="{{ appointment.date|date:'d/m/Y' }}"
+                      data-time="{{ appointment.time }}"
                     >Imprimir receta</button>
                     <button
                       class="ghost-action print-document"
@@ -126,7 +127,18 @@
                       data-age="{{ appointment.patient.age }}"
                       data-code="{{ appointment.code }}"
                       data-date="{{ appointment.date|date:'d/m/Y' }}"
+                      data-time="{{ appointment.time }}"
                     >Imprimir orden</button>
+                    <button
+                      class="ghost-action print-document"
+                      type="button"
+                      data-document-type="medical_certificate"
+                      data-patient="{{ appointment.patient.name }}"
+                      data-age="{{ appointment.patient.age }}"
+                      data-code="{{ appointment.code }}"
+                      data-date="{{ appointment.date|date:'d/m/Y' }}"
+                      data-time="{{ appointment.time }}"
+                    >Imprimir certificado</button>
                     <button class="ghost-action" type="submit">Guardar notas</button>
                     <span class="form-message" role="status"></span>
                   </div>
@@ -141,6 +153,6 @@
     </div>
 
     <section class="print-area" id="printArea" aria-hidden="true"></section>
-    <script src="{% static 'panel.js' %}?v=2"></script>
+    <script src="{% static 'panel.js' %}?v=3"></script>
   </body>
 </html>
