@@ -71,6 +71,54 @@ function formatDocumentText(value) {
     .join("");
 }
 
+function waitForPrintImages(container) {
+  const images = Array.from(container.querySelectorAll("img"));
+  return Promise.all(
+    images.map((image) => {
+      if (image.complete) {
+        if (image.naturalWidth > 0 && image.decode) {
+          return image.decode().catch(() => undefined);
+        }
+        return Promise.resolve();
+      }
+
+      return new Promise((resolve) => {
+        image.addEventListener("load", resolve, { once: true });
+        image.addEventListener("error", resolve, { once: true });
+      });
+    })
+  );
+}
+
+function setCertificatePageStyle(enabled) {
+  const styleId = "certificatePrintPageStyle";
+  const existingStyle = document.querySelector(`#${styleId}`);
+
+  if (!enabled) {
+    existingStyle?.remove();
+    return;
+  }
+
+  if (existingStyle) return;
+
+  const style = document.createElement("style");
+  style.id = styleId;
+  style.textContent = "@page { size: A4 portrait; margin: 0; }";
+  document.head.appendChild(style);
+}
+
+function preparePrintMode(isCertificate) {
+  document.body.classList.toggle("certificate-print-mode", isCertificate);
+  setCertificatePageStyle(isCertificate);
+}
+
+function clearPrintMode() {
+  document.body.classList.remove("certificate-print-mode");
+  setCertificatePageStyle(false);
+}
+
+window.addEventListener("afterprint", clearPrintMode);
+
 function renderStandardDocument(button, form, printArea) {
   const documentType = button.dataset.documentType;
   const siteTitle = document.body.dataset.siteTitle || "OZONO SALUD";
@@ -175,7 +223,9 @@ function renderCertificateDocument(button, form, printArea) {
 
   printArea.innerHTML = `
     <article class="medical-print-sheet certificate-print-sheet">
-      <img class="print-watermark" src="${escapeHtml(watermarkSrc)}" alt="" />
+      <div class="certificate-frame certificate-frame-outer" aria-hidden="true"></div>
+      <div class="certificate-frame certificate-frame-inner" aria-hidden="true"></div>
+      <img class="certificate-watermark" src="${escapeHtml(watermarkSrc)}" alt="" />
       <header class="print-header">
         <img class="print-logo" src="${escapeHtml(logoSrc)}" alt="${escapeHtml(siteTitle)}" />
         <div>
@@ -196,17 +246,20 @@ function renderCertificateDocument(button, form, printArea) {
 }
 
 document.querySelectorAll(".print-document").forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", async () => {
     const form = button.closest(".notes-form");
     const printArea = document.querySelector("#printArea");
     const documentType = button.dataset.documentType;
 
     if (documentType === "medical_certificate") {
       if (!renderCertificateDocument(button, form, printArea)) return;
+      preparePrintMode(true);
     } else {
       renderStandardDocument(button, form, printArea);
+      preparePrintMode(false);
     }
 
+    await waitForPrintImages(printArea);
     window.print();
   });
 });
